@@ -2,6 +2,16 @@
 
 All notable changes to PE Intelligence AI will be documented in this file.
 
+## [1.0.1] - 2024-02-13
+
+### Security
+- **CRITICAL**: Updated FastAPI from 0.109.0 to 0.115.6 (fixes ReDoS vulnerability)
+- **CRITICAL**: Updated python-multipart from 0.0.6 to 0.0.22 (fixes multiple vulnerabilities including arbitrary file write and DoS)
+- **CRITICAL**: Updated Next.js from 14.1.0 to 15.0.8 (fixes HTTP request deserialization DoS vulnerability)
+
+### Changed
+- Bumped dependency versions to patched releases for security compliance
+
 ## [1.0.0] - 2024-02-13
 
 ### Added

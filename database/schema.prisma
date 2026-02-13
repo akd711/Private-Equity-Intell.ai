@@ -1,0 +1,168 @@
+// Prisma schema for PE Intelligence AI
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          String    @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  founderReports   FounderReport[]
+  legalReports     LegalReport[]
+  creditReports    CreditReport[]
+  
+  @@map("users")
+}
+
+model FounderReport {
+  id              String    @id @default(cuid())
+  userId          String
+  founderName     String
+  linkedinUrl     String?
+  twitterUrl      String?
+  pitchDeckPath   String?
+  userNotes       String?
+  
+  // Analysis results
+  summary         String
+  scorecard       Json      // Leadership, Execution, DomainFit, Risk, SignalStrength
+  riskLevel       String
+  keyStrengths    Json
+  keyRisks        Json
+  suggestedQuestions Json
+  citations       Json
+  confidenceScore Float
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([founderName])
+  @@map("founder_reports")
+}
+
+model LegalReport {
+  id              String    @id @default(cuid())
+  userId          String
+  documentPath    String
+  documentType    String    @default("contract")
+  
+  // Analysis results
+  summary         String
+  riskLevel       String
+  clauses         Json
+  redlines        Json
+  citations       Json
+  confidenceScore Float
+  lawyerRequired  Boolean
+  lawyerRequiredReason String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("legal_reports")
+}
+
+model CreditReport {
+  id              String    @id @default(cuid())
+  userId          String
+  documentPath    String
+  
+  // Credit facility details
+  loanAmount      String?
+  interestRate    String?
+  margin          String?
+  maturityDate    String?
+  
+  // Analysis results
+  summary         String
+  riskLevel       String
+  covenants       Json
+  eventsOfDefault Json
+  securityCollateral Json
+  fees            Json
+  riskHeatmap     Json
+  hiddenCosts     Json
+  negotiationPoints Json
+  worstCaseScenario String
+  aggressiveTerms Json
+  unusualCovenants Json
+  citations       Json
+  confidenceScore Float
+  lawyerRequired  Boolean
+  lawyerRequiredReason String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("credit_reports")
+}
+
+model Document {
+  id              String    @id @default(cuid())
+  filename        String
+  filepath        String
+  filesize        Int
+  mimetype        String
+  uploadedBy      String?
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([uploadedBy])
+  @@map("documents")
+}
+
+model VectorEmbedding {
+  id              String    @id @default(cuid())
+  collectionName  String
+  documentId      String?
+  chunkIndex      Int?
+  text            String
+  embedding       Unsupported("vector(1536)")?
+  metadata        Json?
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([collectionName])
+  @@index([documentId])
+  @@map("vector_embeddings")
+}
+
+model AuditLog {
+  id              String    @id @default(cuid())
+  userId          String?
+  action          String
+  resource        String
+  resourceId      String?
+  metadata        Json?
+  ipAddress       String?
+  userAgent       String?
+  
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
